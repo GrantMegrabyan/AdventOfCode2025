@@ -7,13 +7,13 @@ fn main() {
 
     let day = &arg[..5];
     let part = &arg[5..];
-    let input = get_input(day, part);
+    let input = get_input(day);
 
     run(day, part, &input);
 }
 
-fn get_input(day: &str, part: &str) -> String {
-    std::fs::read_to_string(format!("inputs/{}{}.txt", day, part)).unwrap()
+fn get_input(day: &str) -> String {
+    std::fs::read_to_string(format!("inputs/{}.txt", day)).unwrap()
 }
 
 fn run(day: &str, part: &str, input: &str) {
@@ -22,7 +22,10 @@ fn run(day: &str, part: &str, input: &str) {
             let result = day01::part1(input).unwrap();
             println!("Result: {}", result);
         }
-        // ("day01", "part2") => day01::part2(input),
+        ("day01", "part2") => {
+            let result = day01::part2(input).unwrap();
+            println!("Result: {}", result);
+        }
         _ => panic!("Invalid day or part"),
     }
 }
