@@ -85,6 +85,10 @@ fn run(day: &str, part: &str, input: &str) {
             let result = day08::part1(input, 1000).unwrap();
             println!("Result: {}", result);
         }
+        ("day08", "part2") => {
+            let result = day08::part2(input).unwrap();
+            println!("Result: {}", result);
+        }
         _ => panic!("Invalid day or part"),
     }
 }

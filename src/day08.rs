@@ -47,7 +47,7 @@ impl FromStr for Point {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Pair {
     p1: Point,
     p2: Point,
@@ -58,6 +58,7 @@ struct Pair {
 struct Circuits {
     circuits: Vec<HashSet<Point>>,
     points: HashMap<Point, usize>,
+    largest: usize,
 }
 
 impl Circuits {
@@ -65,6 +66,7 @@ impl Circuits {
         Self {
             circuits: Vec::new(),
             points: HashMap::new(),
+            largest: 0,
         }
     }
 
@@ -76,13 +78,16 @@ impl Circuits {
             for point in points_to_move {
                 self.circuits[circ_id1].insert(point);
                 self.points.entry(point).and_modify(|id| *id = circ_id1);
+                self.largest = self.largest.max(self.circuits[circ_id1].len());
             }
             self.circuits[circ_id2].clear();
         } else if let Some(circ_id) = self.points.get(p1) {
             self.circuits[*circ_id].insert(*p2);
+            self.largest = self.largest.max(self.circuits[*circ_id].len());
             self.points.insert(*p2, *circ_id);
         } else if let Some(circ_id) = self.points.get(p2) {
             self.circuits[*circ_id].insert(*p1);
+            self.largest = self.largest.max(self.circuits[*circ_id].len());
             self.points.insert(*p1, *circ_id);
         } else {
             let new_id = self.circuits.len();
@@ -91,6 +96,7 @@ impl Circuits {
             self.circuits[new_id].insert(*p2);
             self.points.insert(*p1, new_id);
             self.points.insert(*p2, new_id);
+            self.largest = self.largest.max(self.circuits[new_id].len());
         }
     }
 
@@ -190,6 +196,46 @@ pub fn part1(input: &str, iterations: usize) -> Result<i32> {
     Ok(sizes.iter().take(3).product())
 }
 
+pub fn part2(input: &str) -> Result<u64> {
+    let mut points: Vec<Point> = input
+        .trim()
+        .lines()
+        .map(|line| line.parse().unwrap())
+        .collect();
+    points.sort_by_key(|p| p.x);
+
+    let mut circuits = Circuits::new();
+    let mut connections = HashSet::new();
+    let mut i = 0;
+    let mut last_pair;
+
+    loop {
+        let closest = get_closest(&connections, &points);
+        last_pair = Some(closest.clone());
+        if !circuits.contains(&closest.p1, &closest.p2) {
+            circuits.add(&closest.p1, &closest.p2);
+
+            if circuits.largest == points.len() {
+                println!("{i} iterations needed");
+                break;
+            }
+        }
+        connections.insert((closest.p1, closest.p2));
+        i += 1;
+        if i % 100 == 0 {
+            println!("{i}");
+        }
+    }
+
+    let result = if let Some(last_pair) = last_pair {
+        last_pair.p1.x * last_pair.p2.x
+    } else {
+        panic!("Could not find the last pair")
+    };
+
+    Ok(result as u64)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,5 +266,11 @@ mod tests {
     fn test_part1() {
         let result = part1(INPUT, 10);
         assert_eq!(result.unwrap(), 40);
+    }
+
+    #[test]
+    fn test_part2() {
+        let result = part2(INPUT);
+        assert_eq!(result.unwrap(), 25272);
     }
 }
