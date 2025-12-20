@@ -7,6 +7,7 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+mod day10;
 
 fn main() {
     // Read the first argument
@@ -96,6 +97,10 @@ fn run(day: &str, part: &str, input: &str) {
         }
         ("day09", "part2") => {
             let result = day09::part2(input).unwrap();
+            println!("Result: {}", result);
+        }
+        ("day10", "part1") => {
+            let result = day10::part1(input).unwrap();
             println!("Result: {}", result);
         }
         _ => panic!("Invalid day or part"),
